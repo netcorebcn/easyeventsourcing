@@ -1,6 +1,5 @@
 using System;
 using EventStore.ClientAPI.SystemData;
-using Microsoft.Extensions.Configuration;
 
 namespace EasyEventSourcing
 {
@@ -18,10 +17,10 @@ namespace EasyEventSourcing
             Subscription = subscription;
         }
         
-        public static EventStoreOptions Create(string eventStore, string eventStoreManagerHost, string stream) =>
-            new EventStoreOptions(
-                eventStore ?? "tcp://admin:changeit@localhost:1113",
-                eventStoreManagerHost ?? "localhost:2113",
-                (stream ?? "Default",  Guid.NewGuid().ToString()));
+        public static EventStoreOptions Create(
+            string eventStore = "tcp://admin:changeit@localhost:1113", 
+            string eventStoreManagerHost = "localhost:2113", 
+            string stream = "Default") =>
+                new EventStoreOptions(eventStore, eventStoreManagerHost, (stream,  Guid.NewGuid().ToString()));
     }
 }
