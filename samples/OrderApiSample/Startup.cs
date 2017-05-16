@@ -33,7 +33,10 @@ namespace OrderApiSample
             );
 
             services.AddEasyEventSourcing(
-                EventStoreOptions.Create(Configuration), 
+                EventStoreOptions.Create(
+                    Configuration["EVENT_STORE"], 
+                    Configuration["EVENT_STORE_MANAGER_HOST"], 
+                    Configuration["STREAM_NAME"]), 
                 typeof(OrderCreatedEvent).GetTypeInfo().Assembly);
         }
 

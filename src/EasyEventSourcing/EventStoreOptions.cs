@@ -17,11 +17,11 @@ namespace EasyEventSourcing
             ManagerHost = managerHost;
             Subscription = subscription;
         }
-
-        public static EventStoreOptions Create(IConfigurationRoot configuration) =>
+        
+        public static EventStoreOptions Create(string eventStore, string eventStoreManagerHost, string stream) =>
             new EventStoreOptions(
-                configuration["EVENT_STORE"] ?? "tcp://admin:changeit@localhost:1113",
-                configuration["EVENT_STORE_MANAGER_HOST"] ?? "localhost:2113",
-                (configuration["STREAM_NAME"] ?? "Default",  Guid.NewGuid().ToString()));
+                eventStore ?? "tcp://admin:changeit@localhost:1113",
+                eventStoreManagerHost ?? "localhost:2113",
+                (stream ?? "Default",  Guid.NewGuid().ToString()));
     }
 }
