@@ -4,7 +4,7 @@
     <TargetFramework>netstandard1.4</TargetFramework>
 
     <PackageId>EasyEventSourcing</PackageId>
-    <Version>0.0.7</Version>
+    <Version>0.0.9</Version>
     <AssemblyName>EasyEventSourcing</AssemblyName>
     <PackageProjectUrl>https://github.com/netcorebcn/easyeventsourcing</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
