@@ -59,12 +59,12 @@ namespace EasyEventSourcing
             return aggregate;
         }
 
-        public async Task<int> Save(IAggregate aggregate)
+        public async Task<int> Save(IAggregate aggregate, bool concurrencyCheck = true)
         {
             var streamName = StreamName($"{aggregate.GetType().Name }-{aggregate.Id}");
 
             var pendingEvents = aggregate.GetPendingEvents();
-            var originalVersion = aggregate.Version - pendingEvents.Count;
+            var originalVersion = concurrencyCheck ? aggregate.Version - pendingEvents.Count : ExpectedVersion.Any;
 
             WriteResult result;
 

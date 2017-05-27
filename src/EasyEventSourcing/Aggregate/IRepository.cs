@@ -7,6 +7,6 @@ namespace EasyEventSourcing.Aggregate
     {
         Task<TAggregate> GetById<TAggregate>(Guid id) where TAggregate : IAggregate, new();
 
-        Task<int> Save(IAggregate aggregate);
+        Task<int> Save(IAggregate aggregate, bool concurrencyCheck = true);
     }
 }
