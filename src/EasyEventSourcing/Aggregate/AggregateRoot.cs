@@ -7,13 +7,12 @@ namespace EasyEventSourcing.Aggregate
     {
         private readonly List<object> _pendingEvents = new List<object>();
 
-        public Guid Id { get; protected set; }
+        public Guid Id { get; }
         public int Version { get; private set; } = -1;
 
-        public AggregateRoot()
-        {
-            Id = Guid.NewGuid();
-        }
+        public AggregateRoot() => Id = Guid.NewGuid();
+
+        public AggregateRoot(Guid id) => Id = id;
 
         void IAggregate.ApplyEvent(object @event)
         {

@@ -60,7 +60,8 @@ namespace EasyEventSourcing
 
         public async Task<TAggregate> GetById<TAggregate>(Guid id) where TAggregate : IAggregate, new()
         {
-            var aggregate = new TAggregate();
+            var aggregate = (TAggregate)Activator.CreateInstance(typeof(TAggregate), id);
+
             var eventStream = await GetEventStream<TAggregate>(id);
             eventStream.ToList().ForEach(@event => aggregate.ApplyEvent(@event));
             return aggregate;
