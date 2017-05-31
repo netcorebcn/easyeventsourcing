@@ -2,7 +2,7 @@ using System;
 
 namespace EasyEventSourcing.Aggregate
 {
-    internal class AggregateDeletedException : Exception
+    internal class AggregateDeletedException : DomainException
     {
         private object id;
         private Type type;

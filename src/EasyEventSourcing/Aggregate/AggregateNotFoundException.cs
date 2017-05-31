@@ -2,7 +2,7 @@ using System;
 
 namespace EasyEventSourcing.Aggregate
 {
-    internal class AggregateNotFoundException : Exception
+    internal class AggregateNotFoundException : DomainException
     {
         private object id;
         private Type type;
