@@ -24,6 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IEventStoreProjections>(new EventStoreProjectionsClient(options));
             services.AddSingleton<IEventStoreBus>(new EventStoreSubscription(connection, options, eventDeserializer));
             services.AddTransient<IRepository, EventStoreRepository>();
+            services.AddTransient<IEventStore, EventStoreRepository>();
 
             return services;
         }
