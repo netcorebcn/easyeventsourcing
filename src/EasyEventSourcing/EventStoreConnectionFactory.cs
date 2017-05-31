@@ -5,7 +5,7 @@ namespace EasyEventSourcing
 {
     internal static class EventStoreConnectionFactory
     {
-        public static IEventStoreConnection Create(string connectionString)
+        internal static IEventStoreConnection Create(string connectionString)
         {
             connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
             

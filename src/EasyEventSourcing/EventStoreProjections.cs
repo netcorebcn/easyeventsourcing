@@ -17,7 +17,7 @@ namespace EasyEventSourcing
         Task CreateAsync(string projectionName);
     }
 
-    public class EventStoreProjectionsClient : IEventStoreProjections
+    internal class EventStoreProjectionsClient : IEventStoreProjections
     {
         private readonly EventStoreOptions _options;
 

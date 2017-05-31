@@ -8,8 +8,8 @@ using Newtonsoft.Json;
 using EasyEventSourcing.Aggregate;
 
 namespace EasyEventSourcing
-{
-    internal class EventStoreRepository : IRepository
+{   
+    internal class EventStoreRepository : IRepository, IEventStore
     {
         public static readonly string EventClrTypeHeader = "EventClrTypeName";
         public static readonly string AggregateClrTypeHeader = "AggregateClrTypeName";
@@ -28,14 +28,14 @@ namespace EasyEventSourcing
             _eventDeserializer = eventDeserializer;
         }
 
-        public async Task<TAggregate> GetById<TAggregate>(Guid id) where TAggregate : IAggregate, new()
+        public async Task<IEnumerable<object>> GetEventStream<TAggregate>(Guid id) where TAggregate : IAggregate, new()
         {
-            var aggregate = new TAggregate();
             var streamName = StreamName($"{typeof(TAggregate).Name }-{id}");
 
             var eventNumber = 0;
             StreamEventsSlice currentSlice;
             
+            var eventStream = new List<object>();
             do
             {
                 currentSlice = await _eventStoreConnection.ReadStreamEventsForwardAsync(streamName, eventNumber, ReadPageSize, false);
@@ -50,12 +50,19 @@ namespace EasyEventSourcing
 
                 foreach (var resolvedEvent in currentSlice.Events)
                 {
-                    var payload = _eventDeserializer.Deserialize(resolvedEvent.Event);
-                    aggregate.ApplyEvent(payload);
+                    eventStream.Add(_eventDeserializer.Deserialize(resolvedEvent.Event));
                 }
 
             } while (!currentSlice.IsEndOfStream);
 
+            return eventStream;
+        }
+
+        public async Task<TAggregate> GetById<TAggregate>(Guid id) where TAggregate : IAggregate, new()
+        {
+            var aggregate = new TAggregate();
+            var eventStream = await GetEventStream<TAggregate>(id);
+            eventStream.ToList().ForEach(@event => aggregate.ApplyEvent(@event));
             return aggregate;
         }
 
