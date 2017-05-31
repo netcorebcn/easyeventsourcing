@@ -32,12 +32,8 @@ namespace OrderApiSample
                 c.SwaggerDoc("v1", new Info { Title = "Voting API", Version = "v1" })
             );
 
-            services.AddEasyEventSourcing(
-                EventStoreOptions.Create(
-                    Configuration["EVENT_STORE"], 
-                    Configuration["EVENT_STORE_MANAGER_HOST"], 
-                    Configuration["STREAM_NAME"]), 
-                typeof(OrderCreatedEvent).GetTypeInfo().Assembly);
+            services.AddEasyEventSourcing<OrderAggregate>(
+                EventStoreOptions.Create(Configuration["EVENT_STORE"], Configuration["EVENT_STORE_MANAGER_HOST"]));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IEventStoreBus eventBus)

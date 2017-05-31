@@ -7,20 +7,20 @@ namespace EasyEventSourcing
     {    
         public string ConnectionString { get; }
         public string ManagerHost { get; }
-        public (string stream, string group) Subscription { get; }
+
+        public string GroupSubscription { get; } = Guid.NewGuid().ToString();
+
         public UserCredentials Credentials { get; } = new UserCredentials("admin", "changeit");
 
-        private EventStoreOptions(string connectionString, string managerHost, (string, string) subscription)
+        private EventStoreOptions(string connectionString, string managerHost)
         {
             ConnectionString = connectionString;
             ManagerHost = managerHost;
-            Subscription = subscription;
         }
         
         public static EventStoreOptions Create(
             string eventStore = "tcp://admin:changeit@localhost:1113", 
-            string eventStoreManagerHost = "localhost:2113", 
-            string stream = "Default") =>
-                new EventStoreOptions(eventStore, eventStoreManagerHost, (stream,  Guid.NewGuid().ToString()));
+            string eventStoreManagerHost = "localhost:2113") =>
+                new EventStoreOptions(eventStore, eventStoreManagerHost);
     }
 }

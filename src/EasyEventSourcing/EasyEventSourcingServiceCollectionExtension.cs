@@ -8,21 +8,22 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class EasyEventSourcingServiceCollectionExtension
     {
-        public static IServiceCollection AddEasyEventSourcing(this IServiceCollection services, EventStoreOptions options, Assembly eventsAssembly)
+        public static IServiceCollection AddEasyEventSourcing<TAggregateRoot>(this IServiceCollection services, EventStoreOptions options = null) 
+            where TAggregateRoot : IAggregate
         {
             services = services ?? throw new ArgumentNullException(nameof(services));
-            options = options ?? throw new ArgumentNullException(nameof(options));
-            eventsAssembly = eventsAssembly ?? throw new ArgumentNullException(nameof(eventsAssembly));
-
+            options = options ?? EventStoreOptions.Create();
 
             var connection = EventStoreConnectionFactory.Create(options.ConnectionString);
-            var eventDeserializer = new EventDeserializer(eventsAssembly);
+            var eventDeserializer = new EventDeserializer(typeof(TAggregateRoot).GetTypeInfo().Assembly);
+            var projections = new EventStoreProjectionsClient(options);
 
             services.AddSingleton(connection);
             services.AddSingleton(eventDeserializer);
 
-            services.AddSingleton<IEventStoreProjections>(new EventStoreProjectionsClient(options));
-            services.AddSingleton<IEventStoreBus>(new EventStoreSubscription(connection, options, eventDeserializer));
+            services.AddSingleton<IEventStoreProjections>(projections);
+            services.AddSingleton<IEventStoreBus>(new EventStoreSubscription(connection, options, eventDeserializer, projections));
+
             services.AddTransient<IRepository, EventStoreRepository>();
             services.AddTransient<IEventStore, EventStoreRepository>();
 
