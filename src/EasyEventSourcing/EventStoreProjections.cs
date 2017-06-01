@@ -5,6 +5,7 @@ using EventStore.ClientAPI;
 using EventStore.ClientAPI.Common.Log;
 using EventStore.ClientAPI.Exceptions;
 using EventStore.ClientAPI.Projections;
+using static EasyEventSourcing.RetryExtensions;
 
 namespace EasyEventSourcing
 {
@@ -28,25 +29,30 @@ namespace EasyEventSourcing
 
         public async Task CreateAsync(string projectionName, string query)
         {
-            var projectionsClient = await CreateProjectionsClient();
-            await projectionsClient.EnableAsync("$by_category", _options.Credentials);
+            await DefaultRetryAsync(() => CreateAsyncImpl());
 
-            if (await ProjectionExists())
-                await projectionsClient.UpdateQueryAsync(projectionName, query, _options.Credentials);
-            else
-                await projectionsClient.CreateContinuousAsync(projectionName, query, _options.Credentials);
-
-            async Task<bool> ProjectionExists()
+            async Task CreateAsyncImpl()
             {
-                try
+                var projectionsClient = await CreateProjectionsClient();
+                await projectionsClient.EnableAsync("$by_category", _options.Credentials);
+
+                if (await ProjectionExists())
+                    await projectionsClient.UpdateQueryAsync(projectionName, query, _options.Credentials);
+                else
+                    await projectionsClient.CreateContinuousAsync(projectionName, query, _options.Credentials);
+
+                async Task<bool> ProjectionExists()
                 {
-                    var projection = await projectionsClient.GetQueryAsync(projectionName, _options.Credentials);
-                    return true;
-                }
-                catch (ProjectionCommandFailedException ex)
-                {
-                    _logger.Error(ex, "");
-                    return false;
+                    try
+                    {
+                        var projection = await projectionsClient.GetQueryAsync(projectionName, _options.Credentials);
+                        return true;
+                    }
+                    catch (ProjectionCommandFailedException ex)
+                    {
+                        _logger.Error(ex, "");
+                        return false;
+                    }
                 }
             }
         }

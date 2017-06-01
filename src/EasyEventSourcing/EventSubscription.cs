@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using EasyEventSourcing.Aggregate;
 using EventStore.ClientAPI;
+using static EasyEventSourcing.RetryExtensions;
 
 namespace EasyEventSourcing
 {
@@ -20,30 +21,40 @@ namespace EasyEventSourcing
             _projections = projections;
         }
 
-        public async Task Subscribe<TAggregate>(Func<object, Task> messageSender) 
+        public async Task Subscribe<TAggregate>(Func<object, Task> messageSender)
             where TAggregate : IAggregate
         {
-            var streamName = $"{typeof(TAggregate).Name}Stream";
-            await _projections.CreateAsync(streamName, DefaultProjection.Default(typeof(TAggregate).Name, streamName));
-            await Subscribe(streamName, messageSender);
+            await DefaultRetryAsync(() => SubscribeImpl());
+
+            async Task SubscribeImpl()
+            {
+                var streamName = $"{typeof(TAggregate).Name}Stream";
+                await _projections.CreateAsync(streamName, DefaultProjection.Default(typeof(TAggregate).Name, streamName));
+                await Subscribe(streamName, messageSender);
+            }
         }
 
         public async Task Subscribe(string streamName, Func<object, Task> messageSender)
         {
-            await CreateSubscription();
+            await DefaultRetryAsync(() => SubscribeImpl());
 
-            await _conn.ConnectToPersistentSubscriptionAsync(
-                streamName, _options.GroupSubscription,
-                (_, x) => messageSender(_eventDeserializer.Deserialize(x.Event)));
-
-
-            async Task CreateSubscription()
+            async Task SubscribeImpl()
             {
-                var settings = PersistentSubscriptionSettings.Create()
-                    .ResolveLinkTos()
-                    .StartFromCurrent();
+                await CreateSubscription();
 
-                await _conn.CreatePersistentSubscriptionAsync(streamName, _options.GroupSubscription, settings, _options.Credentials);
+                await _conn.ConnectToPersistentSubscriptionAsync(
+                    streamName, _options.GroupSubscription,
+                    (_, x) => messageSender(_eventDeserializer.Deserialize(x.Event)));
+
+
+                async Task CreateSubscription()
+                {
+                    var settings = PersistentSubscriptionSettings.Create()
+                        .ResolveLinkTos()
+                        .StartFromCurrent();
+
+                    await _conn.CreatePersistentSubscriptionAsync(streamName, _options.GroupSubscription, settings, _options.Credentials);
+                }
             }
         }
     }
