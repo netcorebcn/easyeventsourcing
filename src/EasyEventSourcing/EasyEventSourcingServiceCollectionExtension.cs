@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddEasyEventSourcing<TAggregateRoot>(
             this IServiceCollection services, 
-            IConfigurationRoot configuration)
+            IConfiguration configuration)
             where TAggregateRoot : IAggregate =>
                 services.AddEasyEventSourcing<TAggregateRoot>(EventStoreOptions.Create(
                         configuration["EVENT_STORE"],
