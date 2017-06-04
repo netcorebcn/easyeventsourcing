@@ -21,7 +21,7 @@ namespace EasyEventSourcing
             _projections = projections;
         }
 
-        public async Task Subscribe<TAggregate>(Func<object, Task> messageSender)
+        public async Task Subscribe<TAggregate>(Func<Guid, object, Task> messageSender)
             where TAggregate : IAggregate
         {
             await DefaultRetryAsync(() => SubscribeImpl());
@@ -34,7 +34,7 @@ namespace EasyEventSourcing
             }
         }
 
-        public async Task Subscribe(string streamName, Func<object, Task> messageSender)
+        public async Task Subscribe(string streamName, Func<Guid, object, Task> messageSender)
         {
             await DefaultRetryAsync(() => SubscribeImpl());
 
@@ -44,8 +44,19 @@ namespace EasyEventSourcing
 
                 await _conn.ConnectToPersistentSubscriptionAsync(
                     streamName, _options.GroupSubscription,
-                    (_, x) => messageSender(_eventDeserializer.Deserialize(x.Event)));
+                    (_, x) => messageSender(
+                        GetAggregateId(x.Event.EventStreamId),
+                        _eventDeserializer.Deserialize(x.Event)));
 
+                Guid GetAggregateId(string streamId)
+                {
+                    var streamIdParts = streamId.Split('-');
+                    return streamIdParts.Length == 2
+                            ? Guid.TryParse(streamIdParts[1], out Guid aggregateId)
+                                ? aggregateId
+                                : Guid.Empty
+                            : Guid.Empty;
+                }
 
                 async Task CreateSubscription()
                 {

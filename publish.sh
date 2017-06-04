@@ -1,3 +1,4 @@
+set -e
 API_KEY=$1
 
 rm -rf ./src/EasyEventSourcing/nupkgs
