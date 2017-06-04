@@ -2,13 +2,24 @@ using System;
 using System.Reflection;
 using EasyEventSourcing;
 using EasyEventSourcing.Aggregate;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class EasyEventSourcingServiceCollectionExtension
     {
-        public static IServiceCollection AddEasyEventSourcing<TAggregateRoot>(this IServiceCollection services, EventStoreOptions options = null) 
+        public static IServiceCollection AddEasyEventSourcing<TAggregateRoot>(
+            this IServiceCollection services, 
+            IConfigurationRoot configuration)
+            where TAggregateRoot : IAggregate =>
+                services.AddEasyEventSourcing<TAggregateRoot>(EventStoreOptions.Create(
+                        configuration["EVENT_STORE"],
+                        configuration["EVENT_STORE_MANAGER_HOST"]));
+        
+        public static IServiceCollection AddEasyEventSourcing<TAggregateRoot>(
+            this IServiceCollection services, 
+            EventStoreOptions options = null) 
             where TAggregateRoot : IAggregate
         {
             services = services ?? throw new ArgumentNullException(nameof(services));
