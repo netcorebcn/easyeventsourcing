@@ -9,18 +9,17 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class EasyEventSourcingServiceCollectionExtension
     {
-        public static IServiceCollection AddEasyEventSourcing<TAggregateRoot>(
-            this IServiceCollection services, 
-            IConfiguration configuration)
-            where TAggregateRoot : IAggregate =>
-                services.AddEasyEventSourcing<TAggregateRoot>(EventStoreOptions.Create(
+        public static IServiceCollection AddEasyEventSourcing<TAggregateRoot>(this IServiceCollection services, 
+            IConfiguration configuration) where TAggregateRoot : IAggregate
+        {
+            configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            return services.AddEasyEventSourcing<TAggregateRoot>(EventStoreOptions.Create(
                         configuration["EVENT_STORE"],
-                        configuration["EVENT_STORE_MANAGER_HOST"]));
-        
-        public static IServiceCollection AddEasyEventSourcing<TAggregateRoot>(
-            this IServiceCollection services, 
-            EventStoreOptions options = null) 
-            where TAggregateRoot : IAggregate
+                        configuration["EVENT_STORE_API"]));
+        }
+
+        public static IServiceCollection AddEasyEventSourcing<TAggregateRoot>(this IServiceCollection services,
+            EventStoreOptions options = null) where TAggregateRoot : IAggregate
         {
             services = services ?? throw new ArgumentNullException(nameof(services));
             options = options ?? EventStoreOptions.Create();
