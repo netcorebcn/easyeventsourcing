@@ -30,9 +30,10 @@ namespace EasyEventSourcing
 
         public async Task<Guid> GetCurrentId<TAggregate>() where TAggregate : IAggregate, new()
         {
+            var projectionName = $"{typeof(TAggregate).Name}Stream";
             var projectionsClient = await CreateProjectionsClient();
-            var aggregateId = await projectionsClient.GetStateAsync(typeof(TAggregate).Name , _options.Credentials);
-            
+            var aggregateId = await projectionsClient.GetStateAsync(projectionName, _options.Credentials);
+
             return Guid.TryParse(aggregateId, out Guid parsedAggregateId)
                 ? parsedAggregateId
                 : Guid.Empty;
