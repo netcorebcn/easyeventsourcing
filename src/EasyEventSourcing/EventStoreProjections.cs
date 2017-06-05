@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using EasyEventSourcing.Aggregate;
 using EventStore.ClientAPI;
 using EventStore.ClientAPI.Common.Log;
 using EventStore.ClientAPI.Exceptions;
@@ -25,6 +26,16 @@ namespace EasyEventSourcing
         {
             var projectionsClient = await CreateProjectionsClient();
             return await projectionsClient.GetStateAsync(projectionName, _options.Credentials);
+        }
+
+        public async Task<Guid> GetCurrentId<TAggregate>() where TAggregate : IAggregate, new()
+        {
+            var projectionsClient = await CreateProjectionsClient();
+            var aggregateId = await projectionsClient.GetStateAsync(typeof(TAggregate).Name , _options.Credentials);
+            
+            return Guid.TryParse(aggregateId, out Guid parsedAggregateId)
+                ? parsedAggregateId
+                : Guid.Empty;
         }
 
         public async Task CreateAsync(string projectionName, string query)

@@ -12,7 +12,7 @@ namespace EasyEventSourcing
             }},
             $any: function(state, ev){{
                 linkTo('{streamName}', ev);
-                return state;          
+                return ev.streamId.split('-')[1];          
             }}      
         }});";
     }
