@@ -34,7 +34,7 @@ namespace EasyEventSourcing
             var projectionsClient = await CreateProjectionsClient();
             var aggregateId = await projectionsClient.GetStateAsync(projectionName, _options.Credentials);
 
-            return Guid.TryParse(aggregateId, out Guid parsedAggregateId)
+            return Guid.TryParseExact(aggregateId.Replace("\"",""), "N", out Guid parsedAggregateId)
                 ? parsedAggregateId
                 : Guid.Empty;
         }
