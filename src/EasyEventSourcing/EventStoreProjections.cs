@@ -48,11 +48,11 @@ namespace EasyEventSourcing
                 var projectionsClient = await CreateProjectionsClient();
                 await projectionsClient.EnableAsync("$by_category", _options.Credentials);
 
-                if (await ProjectionExists())
-                    await projectionsClient.UpdateQueryAsync(projectionName, query, _options.Credentials);
-                else
+                if (!await ProjectionExists())
+                {
                     await projectionsClient.CreateContinuousAsync(projectionName, query, _options.Credentials);
-
+                }
+                
                 async Task<bool> ProjectionExists()
                 {
                     try
