@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace EasyEventSourcing.Tests
